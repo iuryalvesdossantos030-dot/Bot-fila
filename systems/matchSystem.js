@@ -1,10 +1,26 @@
-function gerarMensagemPix(valor) {
-  return `💰 Pagamento via PIX
-Valor: R$${valor},00
+async function criarSala(guild, jogadores) {
 
-Chave PIX: sua-chave-aqui
+  const categoria = guild.channels.cache.find(c => c.name === "PARTIDAS");
 
-⚠️ Só aceitamos com comprovante.`;
+  const canal = await guild.channels.create({
+    name: `partida-${Date.now()}`,
+    type: 0,
+    parent: categoria?.id,
+    permissionOverwrites: [
+      {
+        id: guild.id,
+        deny: ['ViewChannel']
+      },
+      ...jogadores.map(id => ({
+        id: id,
+        allow: ['ViewChannel', 'SendMessages']
+      }))
+    ]
+  });
+
+  canal.send(`🎮 Partida iniciada!
+Jogadores:
+${jogadores.map(id => `<@${id}>`).join('\n')}`);
 }
 
-module.exports = { gerarMensagemPix };
+module.exports = { criarSala };
