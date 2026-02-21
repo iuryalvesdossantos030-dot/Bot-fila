@@ -1,25 +1,21 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { setPix } = require('../systems/pixSystem');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setpix')
-    .setDescription('Definir chave pix')
-    .addStringOption(o =>
-      o.setName('chave')
-        .setDescription('Chave Pix')
-        .setRequired(true)
-    ),
+    .setDescription('Definir chave Pix')
+    .addStringOption(opt =>
+      opt.setName('chave').setDescription('Chave Pix').setRequired(true)),
 
   async execute(interaction, db, isOwner) {
 
     if (!isOwner(interaction))
-      return interaction.reply({ content: 'Somente DONO.', ephemeral: true });
+      return interaction.reply({ content: '❌ Apenas o DONO pode usar.', ephemeral: true });
 
     const chave = interaction.options.getString('chave');
+    setPix(chave);
 
-    db.run("INSERT OR REPLACE INTO pix (guild, chave) VALUES (?, ?)",
-      [interaction.guild.id, chave]);
-
-    interaction.reply('Chave Pix salva.');
+    interaction.reply('✅ Chave Pix atualizada.');
   }
 };
