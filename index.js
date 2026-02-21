@@ -37,4 +37,19 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
+client.once('ready', async () => {
+  console.log(`Logado como ${client.user.tag}`);
+
+  const commands = [];
+  const commandFiles = fs.readdirSync('./commands');
+
+  for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    commands.push(command.data.toJSON());
+  }
+
+  await client.guilds.cache.get(process.env.GUILD_ID)?.commands.set(commands);
+
+  console.log("Comandos registrados automaticamente!");
+});
 client.login(process.env.TOKEN);
