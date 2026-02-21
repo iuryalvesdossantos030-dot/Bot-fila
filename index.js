@@ -31,7 +31,8 @@ client.on('interactionCreate', async interaction => {
     if (!command) return;
 
     try {
-      await command.execute(interaction, null, isOwner, isStaff);
+      const db = require('./database');
+await command.execute(interaction, db, isOwner, isStaff);
     } catch (error) {
       console.error(error);
     }
