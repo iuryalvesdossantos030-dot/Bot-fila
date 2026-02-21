@@ -22,7 +22,26 @@ function isStaff(interaction) {
   return interaction.member.roles.cache.has(process.env.STAFF_ROLE_ID);
 }
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async interaction => { if (interaction.isButton()) {
+
+  if (interaction.customId === 'criar_fila')
+    return interaction.reply({ content: 'Use /fila para criar.', ephemeral: true });
+
+  if (interaction.customId === 'editar_fila')
+    return interaction.reply({ content: 'Use /configfila para editar.', ephemeral: true });
+
+  if (interaction.customId === 'alterar_pix')
+    return interaction.reply({ content: 'Use /setpix para alterar.', ephemeral: true });
+
+  if (interaction.customId === 'ranking')
+    return interaction.reply({ content: 'Use /ranking.', ephemeral: true });
+
+  if (interaction.customId === 'historico')
+    return interaction.reply({ content: 'Use /historico.', ephemeral: true });
+
+  if (interaction.customId === 'reset_ranking')
+    return interaction.reply({ content: 'Ranking resetado.', ephemeral: true });
+}
 
   if (!interaction.isChatInputCommand()) return;
 
