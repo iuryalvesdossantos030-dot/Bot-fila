@@ -1,103 +1,45 @@
-const { 
-  SlashCommandBuilder,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle
-} = require('discord.js');
-
-const { filas, entrarFila, sairFila, confirmar } = require('../systems/queueManager');
-const { criarSala } = require('../systems/matchSystem');
-const { gerarMensagemPix } = require('../systems/pixSystem');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { criarFila } = require('../systems/queueManager');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('fila')
-    .setDescription('Abrir painel da fila')
+    .setDescription('Criar fila')
     .addStringOption(opt =>
-      opt.setName('nome')
-        .setDescription('Nome da fila')
-        .setRequired(true)),
+      opt.setName('nome').setDescription('Nome da fila').setRequired(true))
+    .addStringOption(opt =>
+      opt.setName('modo')
+        .setDescription('Modo')
+        .setRequired(true)
+        .addChoices(
+          { name: '1v1', value: '1v1' },
+          { name: '2v2', value: '2v2' },
+          { name: '3v3', value: '3v3' },
+          { name: '4v4', value: '4v4' }
+        ))
+    .addIntegerOption(opt =>
+      opt.setName('valor').setDescription('Valor em R$').setRequired(true))
+    .addStringOption(opt =>
+      opt.setName('imagem').setDescription('URL da imagem').setRequired(true)),
 
-  async execute(interaction) {
+  async execute(interaction, db, isOwner) {
+
+    if (!isOwner(interaction))
+      return interaction.reply({ content: '❌ Apenas o DONO pode usar.', ephemeral: true });
 
     const nome = interaction.options.getString('nome');
-    const fila = filas.get(nome);
+    const modo = interaction.options.getString('modo');
+    const valor = interaction.options.getInteger('valor');
+    const imagem = interaction.options.getString('imagem');
 
-    if (!fila)
-      return interaction.reply({ content: "❌ Fila não existe.", ephemeral: true });
+    criarFila(nome, modo, valor, imagem);
 
     const embed = new EmbedBuilder()
       .setTitle(`🎮 Fila ${nome}`)
-      .setDescription(`
-Modo: ${fila.modo}
-💰 Valor: R$${fila.valor},00
+      .setDescription(`Modo: ${modo}\n💰 Valor: R$${valor},00`)
+      .setImage(imagem)
+      .setColor("Green");
 
-👥 Jogadores:
-Nenhum jogador
-`)
-      .setImage(fila.imagem || null)
-      .setColor("#2b2d31");
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('entrar')
-        .setLabel('🎮 Entrar')
-        .setStyle(ButtonStyle.Primary),
-
-      new ButtonBuilder()
-        .setCustomId('confirmar')
-        .setLabel('✅ Confirmar')
-        .setStyle(ButtonStyle.Success),
-
-      new ButtonBuilder()
-        .setCustomId('sair')
-        .setLabel('❌ Sair')
-        .setStyle(ButtonStyle.Danger)
-    );
-
-    await interaction.reply({ embeds: [embed], components: [row] });
-    const message = await interaction.fetchReply();
-
-    const collector = message.createMessageComponentCollector();
-
-    collector.on('collect', async i => {
-
-      if (i.customId === 'entrar') {
-        entrarFila(nome, i.user.id);
-        await i.reply({ content: gerarMensagemPix(fila.valor), ephemeral: true });
-      }
-
-      if (i.customId === 'sair') {
-        sairFila(nome, i.user.id);
-      }
-
-      if (i.customId === 'confirmar') {
-        confirmar(nome, i.user.id);
-      }
-
-      const quantidade = parseInt(fila.modo[0]) * 2;
-
-      if (fila.confirmados.length >= quantidade) {
-        await criarSala(interaction.guild, fila.confirmados);
-        fila.jogadores = [];
-        fila.confirmados = [];
-      }
-
-      const lista = fila.jogadores.length > 0
-        ? fila.jogadores.map(id => `<@${id}>`).join('\n')
-        : "Nenhum jogador";
-
-      embed.setDescription(`
-Modo: ${fila.modo}
-💰 Valor: R$${fila.valor},00
-
-👥 Jogadores:
-${lista}
-`);
-
-      await i.update({ embeds: [embed], components: [row] });
-
-    });
+    await interaction.reply({ embeds: [embed] });
   }
 };
