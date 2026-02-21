@@ -1,37 +1,22 @@
-const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 
-const db = new sqlite3.Database('./database.sqlite');
+const path = './data.json';
 
-db.serialize(() => {
+if (!fs.existsSync(path)) {
+  fs.writeFileSync(path, JSON.stringify({
+    filas: {},
+    ranking: {},
+    historico: [],
+    pix: "Não definida"
+  }, null, 2));
+}
 
-  db.run(`CREATE TABLE IF NOT EXISTS filas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    guild TEXT,
-    modo TEXT,
-    jogador TEXT
-  )`);
+function load() {
+  return JSON.parse(fs.readFileSync(path));
+}
 
-  db.run(`CREATE TABLE IF NOT EXISTS ranking (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    guild TEXT,
-    jogador TEXT,
-    elo INTEGER DEFAULT 1000,
-    partidas INTEGER DEFAULT 0,
-    vitorias INTEGER DEFAULT 0
-  )`);
+function save(data) {
+  fs.writeFileSync(path, JSON.stringify(data, null, 2));
+}
 
-  db.run(`CREATE TABLE IF NOT EXISTS pix (
-    guild TEXT PRIMARY KEY,
-    chave TEXT
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS historico (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    guild TEXT,
-    descricao TEXT,
-    data TEXT
-  )`);
-
-});
-
-module.exports = db;
+module.exports = { load, save };
