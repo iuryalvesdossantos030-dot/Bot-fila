@@ -1,40 +1,31 @@
-const filas = new Map();
+const db = require('../database');
 
-function criarFila(nome) {
-  if (!filas.has(nome)) {
-    filas.set(nome, {
-      modo: "1v1",
-      valor: 10,
-      imagem: null,
-      jogadores: [],
-      confirmados: []
-    });
-  }
+function criarFila(nome, modo, valor, imagem) {
+  const data = db.load();
+  data.filas[nome] = {
+    modo,
+    valor,
+    imagem,
+    jogadores: [],
+    confirmados: []
+  };
+  db.save(data);
 }
 
 function entrarFila(nome, userId) {
-  const fila = filas.get(nome);
-  if (!fila.jogadores.includes(userId)) {
-    fila.jogadores.push(userId);
+  const data = db.load();
+  if (!data.filas[nome].jogadores.includes(userId)) {
+    data.filas[nome].jogadores.push(userId);
   }
-}
-
-function sairFila(nome, userId) {
-  const fila = filas.get(nome);
-  fila.jogadores = fila.jogadores.filter(id => id !== userId);
+  db.save(data);
 }
 
 function confirmar(nome, userId) {
-  const fila = filas.get(nome);
-  if (!fila.confirmados.includes(userId)) {
-    fila.confirmados.push(userId);
+  const data = db.load();
+  if (!data.filas[nome].confirmados.includes(userId)) {
+    data.filas[nome].confirmados.push(userId);
   }
+  db.save(data);
 }
 
-module.exports = {
-  filas,
-  criarFila,
-  entrarFila,
-  sairFila,
-  confirmar
-};
+module.exports = { criarFila, entrarFila, confirmar };
