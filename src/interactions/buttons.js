@@ -1,19 +1,40 @@
-const filas = require("../systems/filas")
-const partidas = require("../systems/partidas")
+const filas = require("../systems/filas");
+const partidas = require("../systems/partidas");
 
 module.exports = (client) => {
 
-  client.on("interactionCreate", async interaction => {
+  client.on("interactionCreate", async (interaction) => {
 
-    if (!interaction.isButton()) return
+    if (!interaction.isButton()) return;
 
-    if (interaction.customId === "gel_normal")
-      filas.entrar1v1("gelNormal", interaction)
+    try {
 
-    if (interaction.customId === "gel_infinito")
-      filas.entrar1v1("gelInfinito", interaction)
+      // GEL NORMAL
+      if (interaction.customId === "gel_normal") {
+        await filas.entrar1v1("gelNormal", interaction);
+      }
 
-    if (interaction.customId === "confirmar_partida")
-      partidas.confirmar(interaction)
-  })
-}
+      // GEL INFINITO
+      if (interaction.customId === "gel_infinito") {
+        await filas.entrar1v1("gelInfinito", interaction);
+      }
+
+      // CONFIRMAR PARTIDA
+      if (interaction.customId === "confirmar_partida") {
+        await partidas.confirmar(interaction);
+      }
+
+    } catch (error) {
+      console.error("Erro no botão:", error);
+
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: "❌ Ocorreu um erro ao processar o botão.",
+          ephemeral: true
+        });
+      }
+    }
+
+  });
+
+};
