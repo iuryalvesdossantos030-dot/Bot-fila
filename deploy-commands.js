@@ -3,9 +3,9 @@ const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 
 const commands = [];
-const commandFiles = fs.readdirSync('./commands');
+const files = fs.readdirSync('./commands').filter(f => f.endsWith('.js'));
 
-for (const file of commandFiles) {
+for (const file of files) {
   const command = require(`./commands/${file}`);
   commands.push(command.data.toJSON());
 }
@@ -13,19 +13,9 @@ for (const file of commandFiles) {
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 (async () => {
-  try {
-    console.log('🔄 Registrando comandos...');
-
-    await rest.put(
-      Routes.applicationGuildCommands(
-        process.env.CLIENT_ID,
-        process.env.GUILD_ID
-      ),
-      { body: commands }
-    );
-
-    console.log('✅ Comandos atualizados no servidor!');
-  } catch (error) {
-    console.error(error);
-  }
+  await rest.put(
+    Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+    { body: commands }
+  );
+  console.log('✅ Comandos atualizados no servidor!');
 })();
