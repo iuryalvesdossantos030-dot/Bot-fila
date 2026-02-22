@@ -14,6 +14,7 @@ module.exports = async (interaction) => {
   );
 
   await interaction.deferReply();
+
   await interaction.editReply({
     embeds: [embed],
     components: [row]
