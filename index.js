@@ -8,13 +8,17 @@ const client = new Client({
 
 client.commands = new Collection();
 
-const commandFiles = fs.readdirSync('./commands');
+// Carregar comandos
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
-  client.commands.set(command.data.name, command);
+  if (command.data && command.execute) {
+    client.commands.set(command.data.name, command);
+  }
 }
 
+// Permissões
 function isOwner(interaction) {
   return interaction.guild.ownerId === interaction.user.id;
 }
@@ -23,7 +27,8 @@ function isStaff(interaction) {
   return interaction.member.roles.cache.has(process.env.STAFF_ROLE_ID);
 }
 
-client.on('interactionCreate', async interaction => {
+// Evento principal
+client.on('interactionCreate', async (interaction) => {
 
   // SLASH COMMANDS
   if (interaction.isChatInputCommand()) {
@@ -32,9 +37,16 @@ client.on('interactionCreate', async interaction => {
 
     try {
       const db = require('./database');
-await command.execute(interaction, db, isOwner, isStaff);
+      await command.execute(interaction, db, isOwner, isStaff);
     } catch (error) {
       console.error(error);
+
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: "❌ Erro ao executar comando.",
+          ephemeral: true
+        });
+      }
     }
   }
 
@@ -59,20 +71,10 @@ await command.execute(interaction, db, isOwner, isStaff);
     if (interaction.customId === 'reset_ranking')
       return interaction.reply({ content: 'Ranking resetado.', ephemeral: true });
   }
-
 });
-try {
-  await command.execute(interaction, db, isOwner, isStaff);
-} catch (error) {
-  console.error(error);
-  await interaction.reply({
-    content: "❌ Erro ao executar comando.",
-    ephemeral: true
-  });
-}
 
+// Bot pronto
 client.once('ready', () => {
-
   console.log("Comandos registrados automaticamente!");
 });
 
