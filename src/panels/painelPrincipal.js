@@ -1,0 +1,16 @@
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js")
+
+module.exports = async (interaction) => {
+  const embed = new EmbedBuilder()
+    .setColor("#2b2d31")
+    .setTitle("⚙️ Black Config")
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("abrir_1v1")
+      .setLabel("Filas 1v1")
+      .setStyle(ButtonStyle.Primary)
+  )
+
+  await interaction.reply({ embeds: [embed], components: [row] })
+}
