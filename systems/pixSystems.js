@@ -1,13 +1,31 @@
 const db = require('../database');
+const QRCode = require('qrcode');
+const { Pix } = require('pix-payload');
+const config = require('../config.json');
 
-function setPix(chave) {
-  const data = db.load();
-  data.pix = chave;
-  db.save(data);
-}
+module.exports = async (interaction) => {
 
-function getPix() {
-  return db.load().pix;
-}
+  if (interaction.customId === "gerar_pix") {
 
-module.exports = { setPix, getPix };
+    const chave = await db.get("pix");
+    if (!chave)
+      return interaction.reply({ content: "Nenhuma chave cadastrada.", ephemeral: true });
+
+    const pix = Pix({
+      key: chave,
+      name: config.nomeLoja,
+      city: config.cidade,
+      value: config.valor
+    });
+
+    const payload = pix.payload();
+    const qr = await QRCode.toBuffer(payload);
+
+    await interaction.channel.send({
+      content: "💰 Pagamento via PIX",
+      files: [{ attachment: qr, name: "pix.png" }]
+    });
+
+  }
+
+};
