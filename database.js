@@ -2,41 +2,53 @@ const fs = require('fs');
 
 const file = './data.json';
 
-function read() {
+function ensureFile() {
   if (!fs.existsSync(file)) {
     fs.writeFileSync(file, JSON.stringify({
       pix: null,
       filas: {},
-      ranking: {}
-    }));
+      ranking: {},
+      historico: []
+    }, null, 2));
   }
+}
+
+function load() {
+  ensureFile();
   return JSON.parse(fs.readFileSync(file));
 }
 
-function write(data) {
+function save(data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-function get() {
-  return read();
+function all() {
+  return load();
 }
 
-function set(data) {
-  write(data);
+function get(key) {
+  const data = load();
+  return data[key];
+}
+
+function set(key, value) {
+  const data = load();
+  data[key] = value;
+  save(data);
 }
 
 function setPix(key) {
-  const data = read();
-  data.pix = key;
-  write(data);
+  set('pix', key);
 }
 
 function getPix() {
-  const data = read();
-  return data.pix;
+  return get('pix');
 }
 
 module.exports = {
+  load,
+  save,
+  all,
   get,
   set,
   setPix,
