@@ -16,5 +16,4 @@ client.on("interactionCreate", async interaction => {
   }
 })
 console.log("Comandos registrados automaticamente!");
-});
 client.login(config.token)
