@@ -1,16 +1,22 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js")
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 module.exports = async (interaction) => {
+
   const embed = new EmbedBuilder()
     .setColor("#2b2d31")
-    .setTitle("⚙️ Black Config")
+    .setTitle("⚙️ Black Config");
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId("abrir_1v1")
+      .setCustomId("gel_normal")
       .setLabel("Filas 1v1")
       .setStyle(ButtonStyle.Primary)
-  )
+  );
 
   await interaction.deferReply();
-await interaction.editReply({ embeds: [embed], components: [row] });
+  await interaction.editReply({
+    embeds: [embed],
+    components: [row]
+  });
+
+};
