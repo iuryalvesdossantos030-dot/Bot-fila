@@ -61,6 +61,15 @@ await command.execute(interaction, db, isOwner, isStaff);
   }
 
 });
+try {
+  await command.execute(interaction, db, isOwner, isStaff);
+} catch (error) {
+  console.error(error);
+  await interaction.reply({
+    content: "❌ Erro ao executar comando.",
+    ephemeral: true
+  });
+}
 
 client.once('ready', () => {
 
