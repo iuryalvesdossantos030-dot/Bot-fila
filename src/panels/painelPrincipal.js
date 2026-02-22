@@ -12,5 +12,5 @@ module.exports = async (interaction) => {
       .setStyle(ButtonStyle.Primary)
   )
 
-  await interaction.reply({ embeds: [embed], components: [row] })
-}
+  await interaction.deferReply();
+await interaction.editReply({ embeds: [embed], components: [row] });
