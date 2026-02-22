@@ -1,8 +1,8 @@
 {
-  "token": "SEU_TOKEN",
-  "clientId": "ID_DO_BOT",
-  "ownerId": "SEU_ID",
+  "token": "TOKEN",
+  "clientId": "GUILD_ID",
+  "ownerId": "OWNER_ID",
   "categoriaPartidas": "ID_DA_CATEGORIA",
-  "cargoAdmin": "ID_CARGO_ADMIN",
+  "cargoAdmin": "STAFF_ROLE_ID",
   "logsChannel": "ID_CANAL_LOGS"
 }
