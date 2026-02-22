@@ -1,8 +1,0 @@
-{
-  "token": "TOKEN",
-  "clientId": "GUILD_ID",
-  "ownerId": "OWNER_ID",
-  "categoriaPartidas": "ID_DA_CATEGORIA",
-  "cargoAdmin": "STAFF_ROLE_ID",
-  "logsChannel": "ID_CANAL_LOGS"
-}
