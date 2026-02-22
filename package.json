@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "discord.js": "^14.14.1",
-    "sqlite3": "^5.1.6",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.3.1",
+    "quick.db": "^9.0.6",
+    "qrcode": "^1.5.3",
+    "pix-payload": "^1.0.2"
   }
 }
