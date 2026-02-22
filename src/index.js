@@ -7,6 +7,9 @@ const {
 
 const { REST } = require('@discordjs/rest');
 
+const painelPrincipal = require("./panels/painelPrincipal");
+const buttons = require("./interactions/buttons");
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -14,55 +17,63 @@ const client = new Client({
     ]
 });
 
-// ====== CONFIG ======
+// ===============================
+// VARIÁVEIS DO RAILWAY
+// ===============================
 const token = process.env.TOKEN;
-const clientId = process.env.CLIENT_ID; // ID da aplicação
-const guildId = process.env.GUILD_ID;   // ID do servidor para registrar rápido
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
 
-// ====== COMANDOS ======
+// ===============================
+// REGISTRO AUTOMÁTICO DE COMANDOS
+// ===============================
 const commands = [
     new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('Responde com Pong!'),
+        .setName('painel')
+        .setDescription('Abre o painel principal'),
 
     new SlashCommandBuilder()
-        .setName('painel')
-        .setDescription('Abre o painel principal')
-].map(command => command.toJSON());
+        .setName('ping')
+        .setDescription('Responde com Pong!')
+].map(cmd => cmd.toJSON());
 
-// ====== REGISTRAR COMANDOS ======
 const rest = new REST({ version: '10' }).setToken(token);
 
 (async () => {
     try {
-        console.log('Registrando comandos...');
+        console.log("🔄 Registrando comandos...");
 
         await rest.put(
             Routes.applicationGuildCommands(clientId, guildId),
-            { body: commands },
+            { body: commands }
         );
 
-        console.log('Comandos registrados com sucesso.');
+        console.log("✅ Comandos registrados com sucesso.");
     } catch (error) {
         console.error(error);
     }
 })();
 
-// ====== EVENTOS ======
-client.once('ready', () => {
-    console.log(`✅ Bot online como ${client.user.tag}`);
-});
+// ===============================
+// EVENTOS
+// ===============================
+buttons(client);
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === 'painel') {
+        await painelPrincipal(interaction);
+    }
 
     if (interaction.commandName === 'ping') {
         await interaction.reply('🏓 Pong!');
     }
-
-    if (interaction.commandName === 'painel') {
-        await interaction.reply('📋 Painel funcionando!');
-    }
 });
 
+client.once('ready', () => {
+    console.log(`✅ Bot online como ${client.user.tag}`);
+});
+
+// ===============================
 client.login(process.env.TOKEN);
