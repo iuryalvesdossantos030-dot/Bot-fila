@@ -40,23 +40,25 @@ export async function criarSalaPrivada(guild, players, mediadorId, client) {
     }))
   });
 
-  await canalTexto.send({
-  content: '⚖️ **MEDIADOR:** selecione o vencedor da partida',
-  components: [{
-    type: 1,
-    components: [
-      {
-        type: 2,
-        style: 3,
-        label: `Vitória ${players[0].username}`,
-        custom_id: `vencedor_${players[0].id}`
-      },
-      {
-        type: 2,
-        style: 1,
-        label: `Vitória ${players[1].username}`,
-        custom_id: `vencedor_${players[1].id}`
-      }
-    ]
-  }]
+  import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} from 'discord.js';
+
+await canalTexto.send({
+  content: '🎖️ **MEDIADOR:** selecione o vencedor da partida',
+  components: [
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`vencedor_${players[0].id}`)
+        .setLabel(`Vitória ${players[0].username}`)
+        .setStyle(ButtonStyle.Danger),
+
+      new ButtonBuilder()
+        .setCustomId(`vencedor_${players[1].id}`)
+        .setLabel(`Vitória ${players[1].username}`)
+        .setStyle(ButtonStyle.Primary)
+    )
+  ]
 });
