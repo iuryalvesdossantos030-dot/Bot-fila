@@ -1,28 +1,21 @@
 import { entrarFila } from './filaHandler.js';
-import { entrarMediador } from './mediadorHandler.js';
+import { escolherVencedor } from './vencedorHandler.js';
 
 export default async function interactionHandler(interaction) {
-  try {
-    if (!interaction.isButton()) return;
+  if (!interaction.isButton()) return;
 
-    const { customId } = interaction;
+  if (interaction.customId.startsWith('fila_')) {
+    return entrarFila(interaction);
+  }
 
-    if (customId.startsWith('fila_')) {
-      return entrarFila(interaction);
-    }
+  if (interaction.customId.startsWith('vencedor_')) {
+    return escolherVencedor(interaction);
+  }
 
-    if (customId === 'mediador_entrar') {
-      return entrarMediador(interaction);
-    }
-
-  } catch (err) {
-    console.error('❌ interactionHandler erro:', err);
-
-    if (!interaction.replied && !interaction.deferred) {
-      await interaction.reply({
-        content: '❌ Erro interno no sistema.',
-        ephemeral: true
-      });
-    }
+  if (interaction.customId === 'pix_confirmar') {
+    return interaction.reply({
+      content: '✅ Pagamento confirmado.',
+      ephemeral: true
+    });
   }
 }
