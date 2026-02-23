@@ -1,3 +1,4 @@
+console.log('Import interactionHandler:', interactionHandler);
 import { Client, GatewayIntentBits, REST, Routes, Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
@@ -109,3 +110,5 @@ client.on('interactionCreate', async interaction => {
     console.error('❌ Erro ao iniciar o bot:', err);
   }
 })();
+
+console.log('TOKEN:', process.env.TOKEN);
