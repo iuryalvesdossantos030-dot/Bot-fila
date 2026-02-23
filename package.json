@@ -7,10 +7,10 @@
     "start": "node index.js",
     "deploy": "node deploy-commands.js"
   },
-  "dependencies": {
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5",
-    "ioredis": "^5.4.1",
-    "better-sqlite3": "^9.4.0"
-  }
+"dependencies": {
+  "discord.js": "^14.15.3",
+  "dotenv": "^16.4.5",
+  "ioredis": "^5.4.1",
+  "better-sqlite3": "^9.4.0",
+  "express": "^4.19.2"
 }
