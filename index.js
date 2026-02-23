@@ -1,4 +1,3 @@
-console.log('Import interactionHandler:', interactionHandler);
 import { Client, GatewayIntentBits, REST, Routes, Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
@@ -6,6 +5,12 @@ import { fileURLToPath } from 'url';
 
 import interactionHandler from './handlers/interactionHandler.js';
 import { keepAlive } from './keepAlive.js';
+
+// ✅ DEBUG (depois dos imports)
+console.log('Import interactionHandler:', interactionHandler);
+console.log('TOKEN:', process.env.TOKEN);
+console.log('CLIENT_ID:', process.env.CLIENT_ID);
+console.log('GUILD_ID:', process.env.GUILD_ID);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,14 +77,12 @@ client.once('clientReady', () => {
 // ================= INTERACTIONS =================
 client.on('interactionCreate', async interaction => {
   try {
-    // SLASH COMMANDS
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
       return await command.execute(interaction);
     }
 
-    // BOTÕES / SELECT / MODAL
     if (
       interaction.isButton() ||
       interaction.isStringSelectMenu() ||
@@ -103,12 +106,26 @@ client.on('interactionCreate', async interaction => {
 // ================= START =================
 (async () => {
   try {
+
+    if (!process.env.TOKEN) {
+      throw new Error('TOKEN não definido nas variáveis da Railway');
+    }
+
+    if (!process.env.CLIENT_ID) {
+      throw new Error('CLIENT_ID não definido');
+    }
+
+    if (!process.env.GUILD_ID) {
+      throw new Error('GUILD_ID não definido');
+    }
+
     await loadCommands();
     keepAlive();
     await client.login(process.env.TOKEN);
+
+    console.log('🚀 Bot iniciado com sucesso');
+
   } catch (err) {
     console.error('❌ Erro ao iniciar o bot:', err);
   }
 })();
-
-console.log('TOKEN:', process.env.TOKEN);
