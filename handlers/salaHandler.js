@@ -6,7 +6,7 @@ import {
   PermissionsBitField
 } from 'discord.js';
 
-export async function criarSalaPrivada(guild, players, mediadorId, client) {
+export async function criarSalaPrivada(guild, players, mediadorId) {
   try {
     // 🔒 Criar canal privado
     const canalTexto = await guild.channels.create({
