@@ -17,43 +17,41 @@ const client = new Client({
   ]
 });
 
-// ================= COMMANDS =================
 client.commands = new Collection();
 
-const commands = [];
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
+// ================= LOAD + REGISTER COMMANDS =================
+async function loadCommands() {
+  const commands = [];
+  const commandsPath = path.join(__dirname, 'commands');
 
-for (const file of commandFiles) {
-  const filePath = path.join(commandsPath, file);
-  const command = (await import(filePath)).default;
+  if (!fs.existsSync(commandsPath)) return;
 
-  if (command?.data && command?.execute) {
-    client.commands.set(command.data.name, command);
-    commands.push(command.data.toJSON());
+  const commandFiles = fs
+    .readdirSync(commandsPath)
+    .filter(file => file.endsWith('.js'));
+
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = (await import(filePath)).default;
+
+    if (command?.data && command?.execute) {
+      client.commands.set(command.data.name, command);
+      commands.push(command.data.toJSON());
+    }
   }
+
+  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+  await rest.put(
+    Routes.applicationGuildCommands(
+      process.env.CLIENT_ID,
+      process.env.GUILD_ID
+    ),
+    { body: commands }
+  );
+
+  console.log('✅ Slash commands registrados');
 }
-
-// ================= REGISTER SLASH =================
-const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-
-(async () => {
-  try {
-    console.log('🔄 Registrando comandos slash...');
-
-    await rest.put(
-      Routes.applicationGuildCommands(
-        process.env.CLIENT_ID,
-        process.env.GUILD_ID
-      ),
-      { body: commands }
-    );
-
-    console.log('✅ Comandos registrados com sucesso!');
-  } catch (error) {
-    console.error('❌ Erro ao registrar comandos:', error);
-  }
-})();
 
 // ================= READY =================
 client.once('clientReady', () => {
@@ -68,8 +66,8 @@ client.on('interactionCreate', async interaction => {
 
     try {
       await command.execute(interaction);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       await interaction.reply({
         content: '❌ Erro ao executar o comando.',
         ephemeral: true
@@ -82,5 +80,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 // ================= START =================
-keepAlive();
-client.login(process.env.TOKEN);
+(async () => {
+  await loadCommands();
+  keepAlive();
+  await client.login(process.env.TOKEN);
+})();
