@@ -1,102 +1,67 @@
-// handlers/interactionHandler.js
-
-import { joinQueue, leaveQueue } from './queueHandler.js';
-import { joinMediator, leaveMediator } from './mediatorHandler.js';
-import { confirmPresence } from './confirmHandler.js';
-import { finalizeMatch } from './finalizeHandler.js';
-import { sendPixMessage, configPix } from './pixHandler.js';
-import { getTop10 } from './rankingHandler.js';
-import { isOwner } from '../services/permissions.js';
-
 export default async function interactionHandler(interaction) {
+  try {
+    // ================= BOTÕES =================
+    if (interaction.isButton()) {
+      const { customId } = interaction;
 
-  /* =====================================================
-     BOTÕES (BUTTON INTERACTIONS)
-  ===================================================== */
-  if (interaction.isButton()) {
-    const id = interaction.customId;
-
-    // 🎮 Entrar na fila (join_1x1_10, join_2x2_50 etc)
-    if (id.startsWith('join_')) {
-      const [, modo, valor] = id.split('_');
-      return joinQueue(interaction, modo, valor);
-    }
-
-    // ❌ Sair da fila
-    if (id.startsWith('leave_')) {
-      const [, modo, valor] = id.split('_');
-      return leaveQueue(interaction, modo, valor);
-    }
-
-    // ⚖️ Mediador entra na fila
-    if (id === 'mediator_join') {
-      return joinMediator(interaction);
-    }
-
-    // ⚖️ Mediador sai da fila
-    if (id === 'mediator_leave') {
-      return leaveMediator(interaction);
-    }
-
-    // ✅ Jogador confirma presença
-    if (id === 'confirm_presence') {
-      return confirmPresence(interaction);
-    }
-
-    // 🏁 Mediador finaliza a partida
-    if (id === 'finalize_match') {
-      return finalizeMatch(interaction);
-    }
-
-    // 💳 Mediador envia PIX manualmente (opcional)
-    if (id === 'send_pix') {
-      return sendPixMessage(interaction.channel);
-    }
-  }
-
-  /* =====================================================
-     SLASH COMMANDS (/commands)
-  ===================================================== */
-  if (interaction.isChatInputCommand()) {
-
-    // 🏆 /ranking
-    if (interaction.commandName === 'ranking') {
-      const top = getTop10();
-
-      if (!top.length) {
-        return interaction.reply({
-          content: '📉 Ainda não há partidas registradas.',
-          ephemeral: true
-        });
+      // Fila
+      if (customId.startsWith('fila_')) {
+        return handleFila(interaction);
       }
 
-      const rankingText = top.map((u, i) =>
-        `#${i + 1} <@${u.user_id}> | 🏆 ${u.wins} | ❌ ${u.losses} | 🎮 ${u.matches}`
-      ).join('\n');
-
-      return interaction.reply({
-        content: `🏆 **RANKING DAMON**\n\n${rankingText}`
-      });
-    }
-
-    // 💳 /config-pix (mediador)
-    if (interaction.commandName === 'config-pix') {
-      return configPix(interaction);
-    }
-
-    // ⚙️ /painel (somente dono)
-    if (interaction.commandName === 'painel') {
-      if (!isOwner(interaction)) {
-        return interaction.reply({
-          content: '❌ Apenas o dono do servidor pode usar este comando.',
-          ephemeral: true
-        });
+      // Mediador
+      if (customId.startsWith('mediador_')) {
+        return handleMediador(interaction);
       }
 
-      return interaction.reply({
-        content: '⚙️ Painel do dono aberto.\n(Em breve opções avançadas)',
+      // Confirmação Pix
+      if (customId.startsWith('pix_')) {
+        return handlePix(interaction);
+      }
+
+      return;
+    }
+
+    // ================= SELECT MENU =================
+    if (interaction.isStringSelectMenu()) {
+      return;
+    }
+
+    // ================= MODAL =================
+    if (interaction.isModalSubmit()) {
+      return;
+    }
+
+  } catch (err) {
+    console.error('❌ Erro no interactionHandler:', err);
+
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: '❌ Erro interno.',
         ephemeral: true
       });
     }
   }
-          }
+}
+
+// ================= HANDLERS PLACEHOLDER =================
+async function handleFila(interaction) {
+  await interaction.reply({
+    content: '⏳ Você entrou na fila.',
+    ephemeral: true
+  });
+}
+
+async function handleMediador(interaction) {
+  await interaction.reply({
+    content: '⚖️ Você entrou na fila de mediadores.',
+    ephemeral: true
+  });
+}
+
+async function handlePix(interaction) {
+  await interaction.reply({
+    content: '💳 Pix registrado.',
+    ephemeral: true
+  });
+}
