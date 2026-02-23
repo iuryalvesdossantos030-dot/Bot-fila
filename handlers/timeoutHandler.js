@@ -1,21 +1,17 @@
 // handlers/timeoutHandler.js
+import redis from '../services/redis.js';
 
-export async function handleQueueTimeout({
-  redis,
-  queueKey,
-  userId,
-  channel
-}) {
-  try {
-    // remove usuário da fila após timeout
-    await redis.lrem(queueKey, 0, userId);
+export function startConfirmTimeout(channel, matchId) {
+  setTimeout(async () => {
+    try {
+      const confirms = await redis.smembers(`confirm:${matchId}`);
 
-    if (channel) {
-      await channel.send(
-        `⏱️ <@${userId}> saiu da fila por tempo limite.`
-      );
+      if (confirms.length < 2) {
+        await channel.send('❌ Partida cancelada por falta de confirmação.');
+        await channel.delete().catch(() => {});
+      }
+    } catch (err) {
+      console.error('Erro no startConfirmTimeout:', err);
     }
-  } catch (err) {
-    console.error("Erro no timeoutHandler:", err);
-  }
+  }, 180000); // 3 minutos
 }
