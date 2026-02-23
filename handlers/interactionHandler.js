@@ -1,67 +1,28 @@
+import { entrarFila } from './filaHandler.js';
+import { entrarMediador } from './mediadorHandler.js';
+
 export default async function interactionHandler(interaction) {
   try {
-    // ================= BOTÕES =================
-    if (interaction.isButton()) {
-      const { customId } = interaction;
+    if (!interaction.isButton()) return;
 
-      // Fila
-      if (customId.startsWith('fila_')) {
-        return handleFila(interaction);
-      }
+    const { customId } = interaction;
 
-      // Mediador
-      if (customId.startsWith('mediador_')) {
-        return handleMediador(interaction);
-      }
-
-      // Confirmação Pix
-      if (customId.startsWith('pix_')) {
-        return handlePix(interaction);
-      }
-
-      return;
+    if (customId.startsWith('fila_')) {
+      return entrarFila(interaction);
     }
 
-    // ================= SELECT MENU =================
-    if (interaction.isStringSelectMenu()) {
-      return;
-    }
-
-    // ================= MODAL =================
-    if (interaction.isModalSubmit()) {
-      return;
+    if (customId === 'mediador_entrar') {
+      return entrarMediador(interaction);
     }
 
   } catch (err) {
-    console.error('❌ Erro no interactionHandler:', err);
+    console.error('❌ interactionHandler erro:', err);
 
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
-        content: '❌ Erro interno.',
+        content: '❌ Erro interno no sistema.',
         ephemeral: true
       });
     }
   }
-}
-
-// ================= HANDLERS PLACEHOLDER =================
-async function handleFila(interaction) {
-  await interaction.reply({
-    content: '⏳ Você entrou na fila.',
-    ephemeral: true
-  });
-}
-
-async function handleMediador(interaction) {
-  await interaction.reply({
-    content: '⚖️ Você entrou na fila de mediadores.',
-    ephemeral: true
-  });
-}
-
-async function handlePix(interaction) {
-  await interaction.reply({
-    content: '💳 Pix registrado.',
-    ephemeral: true
-  });
 }
