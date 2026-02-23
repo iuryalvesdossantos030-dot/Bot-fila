@@ -4,7 +4,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import interactionHandler from './handlers/interactionHandler.js';
-import { keepAlive } from './keepAlive.js';
 
 // ✅ DEBUG (depois dos imports)
 console.log('Import interactionHandler:', interactionHandler);
