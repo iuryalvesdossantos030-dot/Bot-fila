@@ -40,10 +40,23 @@ export async function criarSalaPrivada(guild, players, mediadorId, client) {
     }))
   });
 
-  await canalTexto.send(
-    `🎮 **PARTIDA CRIADA**\n\n` +
-    `👤 ${players[0]}\n👤 ${players[1]}\n⚖️ <@${mediadorId}>`
-  );
-
-  await enviarPix(canalTexto, mediadorId, client);
-}
+  await canalTexto.send({
+  content: '⚖️ **MEDIADOR:** selecione o vencedor da partida',
+  components: [{
+    type: 1,
+    components: [
+      {
+        type: 2,
+        style: 3,
+        label: `Vitória ${players[0].username}`,
+        custom_id: `vencedor_${players[0].id}`
+      },
+      {
+        type: 2,
+        style: 1,
+        label: `Vitória ${players[1].username}`,
+        custom_id: `vencedor_${players[1].id}`
+      }
+    ]
+  }]
+});
