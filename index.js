@@ -76,8 +76,13 @@ client.on('interactionCreate', async interaction => {
   }
 
   // Botões / selects / modals
+  if (
+  interaction.isButton() ||
+  interaction.isStringSelectMenu() ||
+  interaction.isModalSubmit()
+) {
   await interactionHandler(interaction);
-});
+  }
 
 // ================= START =================
 (async () => {
