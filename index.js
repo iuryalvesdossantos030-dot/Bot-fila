@@ -2,8 +2,9 @@ import { Client, GatewayIntentBits, REST, Routes, Collection } from 'discord.js'
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { keepAlive } from './keepAlive.js';
+
 import interactionHandler from './handlers/interactionHandler.js';
+import { keepAlive } from './keepAlive.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,14 +18,18 @@ const client = new Client({
   ]
 });
 
+// ================= COMMANDS =================
 client.commands = new Collection();
 
-// ================= LOAD + REGISTER COMMANDS =================
+// ================= LOAD COMMANDS =================
 async function loadCommands() {
   const commands = [];
   const commandsPath = path.join(__dirname, 'commands');
 
-  if (!fs.existsSync(commandsPath)) return;
+  if (!fs.existsSync(commandsPath)) {
+    console.log('⚠️ Pasta commands não encontrada');
+    return;
+  }
 
   const commandFiles = fs
     .readdirSync(commandsPath)
@@ -32,14 +37,19 @@ async function loadCommands() {
 
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    const command = (await import(filePath)).default;
+    const commandModule = await import(filePath);
+    const command = commandModule.default;
 
-    if (command?.data && command?.execute) {
-      client.commands.set(command.data.name, command);
-      commands.push(command.data.toJSON());
+    if (!command?.data || !command?.execute) {
+      console.log(`⚠️ Comando inválido ignorado: ${file}`);
+      continue;
     }
+
+    client.commands.set(command.data.name, command);
+    commands.push(command.data.toJSON());
   }
 
+  // ===== REGISTER SLASH COMMANDS (GUILD) =====
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
   await rest.put(
@@ -50,43 +60,52 @@ async function loadCommands() {
     { body: commands }
   );
 
-  console.log('✅ Slash commands registrados');
+  console.log('✅ Slash commands registrados com sucesso');
 }
 
 // ================= READY =================
 client.once('clientReady', () => {
-  console.log(`✅ Bot Damon online: ${client.user.tag}`);
+  console.log(`✅ Bot online: ${client.user.tag}`);
 });
 
 // ================= INTERACTIONS =================
 client.on('interactionCreate', async interaction => {
-  if (interaction.isChatInputCommand()) {
-    const command = client.commands.get(interaction.commandName);
-    if (!command) return;
+  try {
+    // SLASH COMMANDS
+    if (interaction.isChatInputCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) return;
+      return await command.execute(interaction);
+    }
 
-    try {
-      await command.execute(interaction);
-    } catch (error) {
-      console.error(error);
+    // BOTÕES / SELECT / MODAL
+    if (
+      interaction.isButton() ||
+      interaction.isStringSelectMenu() ||
+      interaction.isModalSubmit()
+    ) {
+      return await interactionHandler(interaction);
+    }
+
+  } catch (err) {
+    console.error('❌ Erro na interactionCreate:', err);
+
+    if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
-        content: '❌ Erro ao executar o comando.',
+        content: '❌ Erro interno no bot.',
         ephemeral: true
       });
     }
   }
-
-  // Botões / selects / modals
-  if (
-  interaction.isButton() ||
-  interaction.isStringSelectMenu() ||
-  interaction.isModalSubmit()
-) {
-  await interactionHandler(interaction);
-  }
+});
 
 // ================= START =================
 (async () => {
-  await loadCommands();
-  keepAlive();
-  await client.login(process.env.TOKEN);
+  try {
+    await loadCommands();
+    keepAlive();
+    await client.login(process.env.TOKEN);
+  } catch (err) {
+    console.error('❌ Erro ao iniciar o bot:', err);
+  }
 })();
